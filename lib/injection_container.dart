@@ -4,6 +4,12 @@ import 'package:get_it/get_it.dart';
 import 'core/network/dio_client.dart';
 import 'core/network/network_info.dart';
 import 'core/storage/isar_service.dart';
+import 'features/catalog/data/datasources/medicine_local_datasource.dart';
+import 'features/catalog/data/datasources/medicine_remote_datasource.dart';
+import 'features/catalog/data/repositories/medicine_repository_impl.dart';
+import 'features/catalog/domain/repositories/medicine_repository.dart';
+import 'features/catalog/domain/usecases/get_medicines_usecase.dart';
+import 'features/catalog/domain/usecases/search_medicines_usecase.dart';
 
 /// Global [GetIt] service locator instance.
 ///
@@ -39,26 +45,34 @@ Future<void> init() async {
   sl.registerLazySingleton<DioClient>(() => DioClient());
 
   // ── Features ──────────────────────────────────────────────────────────
-  // Feature-level registrations will be added here as features are built.
-  // e.g. _initCatalog();
+  _initCatalog();
 }
 
-// ── Feature init helpers (template) ─────────────────────────────────────────
+// ── Feature init helpers ─────────────────────────────────────────────────────
 
-// void _initCatalog() {
-//   // Data sources
-//   sl.registerLazySingleton<CatalogRemoteDataSource>(
-//     () => CatalogRemoteDataSourceImpl(sl<DioClient>().dio),
-//   );
-//   // Repository
-//   sl.registerLazySingleton<CatalogRepository>(
-//     () => CatalogRepositoryImpl(
-//       remoteDataSource: sl(),
-//       networkInfo: sl(),
-//     ),
-//   );
-//   // Use cases
-//   sl.registerLazySingleton(() => GetMedicines(sl()));
-//   // BLoC — factory so each screen gets a fresh instance
-//   sl.registerFactory(() => CatalogBloc(getMedicines: sl()));
-// }
+void _initCatalog() {
+  // Data sources
+  sl.registerLazySingleton<MedicineLocalDataSource>(
+    () => MedicineLocalDataSourceImpl(sl<IsarService>()),
+  );
+  sl.registerLazySingleton<MedicineRemoteDataSource>(
+    () => MedicineRemoteDataSourceImpl(sl<DioClient>()),
+  );
+
+  // Repository
+  sl.registerLazySingleton<MedicineRepository>(
+    () => MedicineRepositoryImpl(
+      remote: sl<MedicineRemoteDataSource>(),
+      local: sl<MedicineLocalDataSource>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<GetMedicinesUseCase>(
+    () => GetMedicinesUseCase(sl<MedicineRepository>()),
+  );
+  sl.registerLazySingleton<SearchMedicinesUseCase>(
+    () => SearchMedicinesUseCase(sl<MedicineRepository>()),
+  );
+}
