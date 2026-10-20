@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'package:med_drop/core/constants/app_constants.dart';
+import 'package:med_drop/features/catalog/data/models/cached_medicine.dart';
 
 /// Manages the lifecycle of the [Isar] local database instance.
 ///
@@ -17,10 +19,10 @@ class IsarService {
   /// Schemas to open with the database.
   ///
   /// Add generated `XxxSchema` constants here as new Isar collections are
-  /// introduced (e.g. `MedicineSchema`, `OrderSchema`).
-  static const List<CollectionSchema<dynamic>> _schemas = [
-    // TODO: Add schemas here as features are developed.
-    // e.g. MedicineSchema, OrderSchema, PrescriptionSchema
+  /// introduced. Schema constants are produced by `build_runner`.
+  // ignore: prefer_const_declarations — generated schemas are not compile-time constants.
+  static final List<CollectionSchema<dynamic>> _schemas = [
+    CachedMedicineSchema,
   ];
 
   /// Opens the Isar instance and assigns it to [db].

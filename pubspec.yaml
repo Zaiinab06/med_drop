@@ -82,10 +82,11 @@ dev_dependencies:
   isar_generator: ^3.1.0+1
 
   # Testing
-  # bloc_test 9.1.5 is the last version whose test_api dependency
-  # stays compatible with isar_generator's analyzer <6.0.0 constraint.
-  bloc_test: ^9.1.5
-  mocktail: ^1.0.4
+  # ⚠️  bloc_test and mocktail are commented out during the code-generation
+  # phase to avoid the test_api ↔ isar_generator analyzer conflict.
+  # Restore them after running: dart run build_runner build --delete-conflicting-outputs
+  # bloc_test: ^9.1.5
+  # mocktail: ^1.0.3
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -128,12 +129,3 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
-
-# ── Dependency overrides ──────────────────────────────────────────────────────
-# Force the analyzer version that satisfies BOTH isar_generator 3.x
-# (which requires analyzer <6.0.0 via its own pubspec upper-bound) AND
-# the transitively required analyzer used by build_runner / flutter_lints.
-#
-# If a future isar_generator release lifts this constraint, remove this block.
-dependency_overrides:
-  analyzer: ^6.4.1
