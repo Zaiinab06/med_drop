@@ -10,6 +10,7 @@ import 'features/catalog/data/repositories/medicine_repository_impl.dart';
 import 'features/catalog/domain/repositories/medicine_repository.dart';
 import 'features/catalog/domain/usecases/get_medicines_usecase.dart';
 import 'features/catalog/domain/usecases/search_medicines_usecase.dart';
+import 'features/catalog/presentation/bloc/catalog_bloc.dart';
 
 /// Global [GetIt] service locator instance.
 ///
@@ -74,5 +75,13 @@ void _initCatalog() {
   );
   sl.registerLazySingleton<SearchMedicinesUseCase>(
     () => SearchMedicinesUseCase(sl<MedicineRepository>()),
+  );
+
+  // BLoC
+  sl.registerFactory<CatalogBloc>(
+    () => CatalogBloc(
+      getMedicinesUseCase: sl<GetMedicinesUseCase>(),
+      searchMedicinesUseCase: sl<SearchMedicinesUseCase>(),
+    ),
   );
 }

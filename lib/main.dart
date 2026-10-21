@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import 'core/constants/app_colors.dart';
 import 'core/constants/app_constants.dart';
+import 'features/catalog/presentation/screens/catalog_screen.dart';
 import 'injection_container.dart' as di;
 
 Future<void> main() async {
@@ -41,7 +42,7 @@ class MedDropApp extends StatelessWidget {
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: _buildTheme(),
-      home: const _AppReadyScreen(),
+      home: const CatalogScreen(),
     );
   }
 
@@ -172,59 +173,3 @@ class MedDropApp extends StatelessWidget {
   }
 }
 
-// ── Temporary landing screen ─────────────────────────────────────────────────
-
-/// Minimal placeholder home screen shown while the full app shell is built.
-///
-/// Remove this class and replace `home:` with the real shell in a future
-/// milestone.
-class _AppReadyScreen extends StatelessWidget {
-  const _AppReadyScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Brand icon placeholder
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius:
-                      BorderRadius.circular(AppConstants.radiusLg),
-                ),
-                child: const Icon(
-                  Icons.local_pharmacy_rounded,
-                  size: 48,
-                  color: AppColors.textOnPrimary,
-                ),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                AppConstants.appName,
-                style: theme.textTheme.displayLarge,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Core infrastructure ready ✓',
-                style: theme.textTheme.bodyMedium,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'v${AppConstants.appVersion}',
-                style: theme.textTheme.labelSmall,
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
