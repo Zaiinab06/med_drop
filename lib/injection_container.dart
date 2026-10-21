@@ -1,5 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:get_it/get_it.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'core/network/dio_client.dart';
 import 'core/network/network_info.dart';
@@ -11,6 +12,14 @@ import 'features/catalog/domain/repositories/medicine_repository.dart';
 import 'features/catalog/domain/usecases/get_medicines_usecase.dart';
 import 'features/catalog/domain/usecases/search_medicines_usecase.dart';
 import 'features/catalog/presentation/bloc/catalog_bloc.dart';
+import 'features/prescription/data/datasources/prescription_local_datasource.dart';
+import 'features/prescription/data/datasources/prescription_remote_datasource.dart';
+import 'features/prescription/data/repositories/prescription_repository_impl.dart';
+import 'features/prescription/data/services/image_compression_service.dart';
+import 'features/prescription/domain/repositories/prescription_repository.dart';
+import 'features/prescription/domain/usecases/get_prescriptions_usecase.dart';
+import 'features/prescription/domain/usecases/upload_prescription_usecase.dart';
+import 'features/prescription/presentation/bloc/prescription_bloc.dart';
 
 /// Global [GetIt] service locator instance.
 ///
@@ -29,6 +38,7 @@ Future<void> init() async {
 
   // connectivity_plus — singleton so the same stream is reused app-wide
   sl.registerLazySingleton<Connectivity>(() => Connectivity());
+  sl.registerLazySingleton<ImagePicker>(() => ImagePicker());
 
   // ── Core: Storage ─────────────────────────────────────────────────────
 
@@ -47,6 +57,7 @@ Future<void> init() async {
 
   // ── Features ──────────────────────────────────────────────────────────
   _initCatalog();
+  _initPrescription();
 }
 
 // ── Feature init helpers ─────────────────────────────────────────────────────
@@ -82,6 +93,48 @@ void _initCatalog() {
     () => CatalogBloc(
       getMedicinesUseCase: sl<GetMedicinesUseCase>(),
       searchMedicinesUseCase: sl<SearchMedicinesUseCase>(),
+    ),
+  );
+}
+
+void _initPrescription() {
+  // Services
+  sl.registerLazySingleton<ImageCompressionService>(
+    () => const ImageCompressionService(),
+  );
+
+  // Data sources
+  sl.registerLazySingleton<PrescriptionLocalDataSource>(
+    () => const PrescriptionLocalDataSourceImpl(),
+  );
+  sl.registerLazySingleton<PrescriptionRemoteDataSource>(
+    () => const PrescriptionRemoteDataSourceImpl(),
+  );
+
+  // Repository
+  sl.registerLazySingleton<PrescriptionRepository>(
+    () => PrescriptionRepositoryImpl(
+      remoteDataSource: sl<PrescriptionRemoteDataSource>(),
+      localDataSource: sl<PrescriptionLocalDataSource>(),
+      imageCompressionService: sl<ImageCompressionService>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<UploadPrescriptionUseCase>(
+    () => UploadPrescriptionUseCase(sl<PrescriptionRepository>()),
+  );
+  sl.registerLazySingleton<GetPrescriptionsUseCase>(
+    () => GetPrescriptionsUseCase(sl<PrescriptionRepository>()),
+  );
+
+  // BLoC
+  sl.registerFactory<PrescriptionBloc>(
+    () => PrescriptionBloc(
+      uploadPrescriptionUseCase: sl<UploadPrescriptionUseCase>(),
+      getPrescriptionsUseCase: sl<GetPrescriptionsUseCase>(),
+      imagePicker: sl<ImagePicker>(),
     ),
   );
 }

@@ -10,6 +10,7 @@ import 'package:med_drop/features/catalog/presentation/bloc/catalog_event.dart';
 import 'package:med_drop/features/catalog/presentation/bloc/catalog_state.dart';
 import 'package:med_drop/features/catalog/presentation/widgets/catalog_search_bar.dart';
 import 'package:med_drop/features/catalog/presentation/widgets/medicine_card.dart';
+import 'package:med_drop/features/prescription/presentation/screens/upload_prescription_screen.dart';
 import 'package:med_drop/injection_container.dart';
 
 /// Primary Catalog Screen displaying the inventory of available medicines.
@@ -71,7 +72,19 @@ class _CatalogViewState extends State<_CatalogView> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.refresh_rounded, color: AppColors.primary),
+            icon: const Icon(Icons.document_scanner_rounded, color: AppColors.primary),
+            tooltip: 'Upload Doctor\'s Prescription (Rx)',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const UploadPrescriptionScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: AppColors.secondaryLight),
             tooltip: 'Force refresh catalog',
             onPressed: () {
               context
@@ -81,6 +94,24 @@ class _CatalogViewState extends State<_CatalogView> {
           ),
           const SizedBox(width: 4),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        elevation: 3,
+        icon: const Icon(Icons.document_scanner_rounded, size: 20),
+        label: const Text(
+          'Upload Rx',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const UploadPrescriptionScreen(),
+            ),
+          );
+        },
       ),
       body: SafeArea(
         child: Column(
