@@ -10,6 +10,10 @@ import 'package:med_drop/features/catalog/presentation/bloc/catalog_event.dart';
 import 'package:med_drop/features/catalog/presentation/bloc/catalog_state.dart';
 import 'package:med_drop/features/catalog/presentation/widgets/catalog_search_bar.dart';
 import 'package:med_drop/features/catalog/presentation/widgets/medicine_card.dart';
+import 'package:med_drop/features/orders/presentation/bloc/cart/cart_bloc.dart';
+import 'package:med_drop/features/orders/presentation/bloc/cart/cart_event.dart';
+import 'package:med_drop/features/orders/presentation/bloc/cart/cart_state.dart';
+import 'package:med_drop/features/orders/presentation/screens/cart_screen.dart';
 import 'package:med_drop/features/prescription/presentation/screens/upload_prescription_screen.dart';
 import 'package:med_drop/injection_container.dart';
 
@@ -80,6 +84,55 @@ class _CatalogViewState extends State<_CatalogView> {
                 MaterialPageRoute(
                   builder: (_) => const UploadPrescriptionScreen(),
                 ),
+              );
+            },
+          ),
+          BlocBuilder<CartBloc, CartLoaded>(
+            builder: (context, cartState) {
+              return Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Icons.shopping_cart_outlined,
+                      color: AppColors.primary,
+                    ),
+                    tooltip: 'Shopping Cart',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const CartScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  if (cartState.totalItemUnits > 0)
+                    Positioned(
+                      right: 4,
+                      top: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(3),
+                        decoration: const BoxDecoration(
+                          color: AppColors.danger,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 17,
+                          minHeight: 17,
+                        ),
+                        child: Text(
+                          '${cartState.totalItemUnits}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               );
             },
           ),
@@ -630,6 +683,7 @@ class _CatalogViewState extends State<_CatalogView> {
   // ── Interactive Actions ─────────────────────────────────────────────────────
 
   void _handleAddToCart(BuildContext context, MedicineEntity medicine) {
+    context.read<CartBloc>().add(AddToCartEvent(medicine));
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -643,11 +697,21 @@ class _CatalogViewState extends State<_CatalogView> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Added ${medicine.brandName} to order.',
+                'Added ${medicine.brandName} to cart.',
                 style: const TextStyle(fontWeight: FontWeight.w500),
               ),
             ),
           ],
+        ),
+        action: SnackBarAction(
+          label: 'View Cart',
+          textColor: AppColors.primaryLight,
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CartScreen()),
+            );
+          },
         ),
         backgroundColor: AppColors.secondary,
         behavior: SnackBarBehavior.floating,

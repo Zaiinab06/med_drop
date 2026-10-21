@@ -12,6 +12,14 @@ import 'features/catalog/domain/repositories/medicine_repository.dart';
 import 'features/catalog/domain/usecases/get_medicines_usecase.dart';
 import 'features/catalog/domain/usecases/search_medicines_usecase.dart';
 import 'features/catalog/presentation/bloc/catalog_bloc.dart';
+import 'features/orders/data/datasources/order_local_datasource.dart';
+import 'features/orders/data/datasources/order_remote_datasource.dart';
+import 'features/orders/data/repositories/order_repository_impl.dart';
+import 'features/orders/domain/repositories/order_repository.dart';
+import 'features/orders/domain/usecases/get_orders_usecase.dart';
+import 'features/orders/domain/usecases/place_order_usecase.dart';
+import 'features/orders/presentation/bloc/cart/cart_bloc.dart';
+import 'features/orders/presentation/bloc/order/order_bloc.dart';
 import 'features/prescription/data/datasources/prescription_local_datasource.dart';
 import 'features/prescription/data/datasources/prescription_remote_datasource.dart';
 import 'features/prescription/data/repositories/prescription_repository_impl.dart';
@@ -58,6 +66,7 @@ Future<void> init() async {
   // ── Features ──────────────────────────────────────────────────────────
   _initCatalog();
   _initPrescription();
+  _initOrders();
 }
 
 // ── Feature init helpers ─────────────────────────────────────────────────────
@@ -135,6 +144,44 @@ void _initPrescription() {
       uploadPrescriptionUseCase: sl<UploadPrescriptionUseCase>(),
       getPrescriptionsUseCase: sl<GetPrescriptionsUseCase>(),
       imagePicker: sl<ImagePicker>(),
+    ),
+  );
+}
+
+void _initOrders() {
+  // Data sources
+  sl.registerLazySingleton<OrderLocalDataSource>(
+    () => const OrderLocalDataSourceImpl(),
+  );
+  sl.registerLazySingleton<OrderRemoteDataSource>(
+    () => const OrderRemoteDataSourceImpl(),
+  );
+
+  // Repository
+  sl.registerLazySingleton<OrderRepository>(
+    () => OrderRepositoryImpl(
+      remoteDataSource: sl<OrderRemoteDataSource>(),
+      localDataSource: sl<OrderLocalDataSource>(),
+      networkInfo: sl<NetworkInfo>(),
+    ),
+  );
+
+  // Use cases
+  sl.registerLazySingleton<PlaceOrderUseCase>(
+    () => PlaceOrderUseCase(sl<OrderRepository>()),
+  );
+  sl.registerLazySingleton<GetOrdersUseCase>(
+    () => GetOrdersUseCase(sl<OrderRepository>()),
+  );
+
+  // BLoC — CartBloc is a singleton so cart state persists across navigation
+  sl.registerLazySingleton<CartBloc>(() => CartBloc());
+
+  // OrderBloc
+  sl.registerFactory<OrderBloc>(
+    () => OrderBloc(
+      placeOrderUseCase: sl<PlaceOrderUseCase>(),
+      getOrdersUseCase: sl<GetOrdersUseCase>(),
     ),
   );
 }
