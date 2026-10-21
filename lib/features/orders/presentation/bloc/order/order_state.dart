@@ -20,6 +20,11 @@ final class OrderPlacing extends OrderState {
   const OrderPlacing();
 }
 
+/// State emitted while fetching order history.
+final class OrderLoading extends OrderState {
+  const OrderLoading();
+}
+
 /// State emitted when the order is successfully placed and confirmed.
 final class OrderSuccess extends OrderState {
   final OrderEntity order;

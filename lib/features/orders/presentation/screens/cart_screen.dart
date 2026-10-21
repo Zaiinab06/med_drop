@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:med_drop/core/constants/app_colors.dart';
 import 'package:med_drop/core/constants/app_constants.dart';
+import 'package:med_drop/core/presentation/screens/main_navigation_shell.dart';
 import 'package:med_drop/features/orders/domain/entities/cart_item_entity.dart';
 import 'package:med_drop/features/orders/presentation/bloc/cart/cart_bloc.dart';
 import 'package:med_drop/features/orders/presentation/bloc/cart/cart_event.dart';
@@ -172,7 +173,13 @@ class _CartViewState extends State<_CartView> {
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () {
+                if (Navigator.canPop(context)) {
+                  Navigator.pop(context);
+                } else {
+                  MainNavigationShell.switchTab(context, 0);
+                }
+              },
               icon: const Icon(Icons.arrow_back_rounded, size: 18),
               label: const Text('Browse Medicines'),
               style: ElevatedButton.styleFrom(
@@ -213,68 +220,108 @@ class _CartViewState extends State<_CartView> {
               : AppColors.warning.withValues(alpha: 0.4),
         ),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            hasAttachedRx
-                ? Icons.check_circle_rounded
-                : Icons.warning_amber_rounded,
-            color: hasAttachedRx
-                ? AppColors.primaryDark
-                : const Color(0xFFB45309),
-            size: 20,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                hasAttachedRx
+                    ? Icons.check_circle_rounded
+                    : Icons.warning_amber_rounded,
+                color: hasAttachedRx
+                    ? AppColors.primaryDark
+                    : const Color(0xFFB45309),
+                size: 20,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      hasAttachedRx
+                          ? 'Prescription Attached (#$_selectedPrescriptionId)'
+                          : 'Prescription Required',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: hasAttachedRx
+                            ? AppColors.primaryDark
+                            : const Color(0xFFB45309),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasAttachedRx
+                          ? 'Your doctor\'s prescription will be verified during order dispensing.'
+                          : 'Your cart contains prescription drugs. Please attach or upload a verified prescription.',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: hasAttachedRx
+                            ? AppColors.textPrimary
+                            : const Color(0xFF92400E),
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  hasAttachedRx
-                      ? 'Prescription Attached (#$_selectedPrescriptionId)'
-                      : 'Prescription Required',
-                  style: TextStyle(
-                    fontSize: 13,
+          const SizedBox(height: 10),
+          if (!hasAttachedRx) ...[
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => _navigateToUploadPrescription(context),
+                icon: const Icon(Icons.upload_file_rounded, size: 16),
+                label: const Text('Upload Prescription Now'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFB45309),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  textStyle: const TextStyle(
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
-                    color: hasAttachedRx
-                        ? AppColors.primaryDark
-                        : const Color(0xFFB45309),
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  hasAttachedRx
-                      ? 'Your doctor\'s prescription will be verified during order dispensing.'
-                      : 'Your cart contains prescription drugs. Please attach or upload a verified prescription.',
+              ),
+            ),
+            const SizedBox(height: 6),
+            Center(
+              child: InkWell(
+                onTap: () => _handleAttachOrUploadPrescription(context),
+                child: const Text(
+                  'Or use a recent approved prescription →',
                   style: TextStyle(
                     fontSize: 11,
-                    color: hasAttachedRx
-                        ? AppColors.textPrimary
-                        : const Color(0xFF92400E),
-                    height: 1.3,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFFB45309),
+                    decoration: TextDecoration.underline,
                   ),
                 ),
-                const SizedBox(height: 8),
-                InkWell(
-                  onTap: () => _handleAttachOrUploadPrescription(context),
-                  child: Text(
-                    hasAttachedRx
-                        ? 'Change Prescription'
-                        : 'Upload / Attach Prescription →',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: hasAttachedRx
-                          ? AppColors.primaryDark
-                          : const Color(0xFFB45309),
-                      decoration: TextDecoration.underline,
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+          ] else ...[
+            InkWell(
+              onTap: () => _handleAttachOrUploadPrescription(context),
+              child: const Text(
+                'Change Prescription →',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primaryDark,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -795,12 +842,7 @@ class _CartViewState extends State<_CartView> {
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const UploadPrescriptionScreen(),
-                    ),
-                  );
+                  _navigateToUploadPrescription(context);
                 },
                 icon: const Icon(Icons.add_a_photo_rounded),
                 label: const Text('Upload New Prescription'),
@@ -830,6 +872,35 @@ class _CartViewState extends State<_CartView> {
         );
       },
     );
+  }
+
+  Future<void> _navigateToUploadPrescription(BuildContext context) async {
+    final result = await Navigator.push<String?>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const UploadPrescriptionScreen(),
+      ),
+    );
+    if (result != null && mounted) {
+      setState(() {
+        _selectedPrescriptionId = result;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.white),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text('Prescription #$result linked to your order!'),
+              ),
+            ],
+          ),
+          backgroundColor: AppColors.primary,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   void _confirmClearCart(BuildContext context) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:med_drop/core/constants/app_colors.dart';
 import 'package:med_drop/core/constants/app_constants.dart';
+import 'package:med_drop/core/presentation/screens/main_navigation_shell.dart';
 import 'package:med_drop/features/orders/domain/entities/order_entity.dart';
 
 /// Screen displayed immediately following a successfully confirmed order checkout.
@@ -92,6 +93,7 @@ class OrderSuccessScreen extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: () {
                   Navigator.of(context).popUntil((route) => route.isFirst);
+                  MainNavigationShell.switchTab(context, 0);
                 },
                 icon: const Icon(Icons.shopping_bag_rounded),
                 label: const Text('Continue Shopping'),
@@ -99,6 +101,23 @@ class OrderSuccessScreen extends StatelessWidget {
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   minimumSize: const Size(double.infinity, 52),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppConstants.radiusMd),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                  MainNavigationShell.switchTab(context, 3);
+                },
+                icon: const Icon(Icons.local_shipping_rounded),
+                label: const Text('View in My Orders'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(AppConstants.radiusMd),
                   ),

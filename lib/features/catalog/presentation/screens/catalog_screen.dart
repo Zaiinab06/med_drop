@@ -4,6 +4,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'package:med_drop/core/constants/app_colors.dart';
 import 'package:med_drop/core/constants/app_constants.dart';
+import 'package:med_drop/core/presentation/screens/main_navigation_shell.dart';
 import 'package:med_drop/features/catalog/domain/entities/medicine_entity.dart';
 import 'package:med_drop/features/catalog/presentation/bloc/catalog_bloc.dart';
 import 'package:med_drop/features/catalog/presentation/bloc/catalog_event.dart';
@@ -29,10 +30,15 @@ class CatalogScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<CatalogBloc>(
-      create: (context) => sl<CatalogBloc>()..add(const LoadCatalogEvent()),
-      child: const _CatalogView(),
-    );
+    try {
+      context.read<CatalogBloc>();
+      return const _CatalogView();
+    } catch (_) {
+      return BlocProvider<CatalogBloc>(
+        create: (context) => sl<CatalogBloc>()..add(const LoadCatalogEvent()),
+        child: const _CatalogView(),
+      );
+    }
   }
 }
 
@@ -79,12 +85,14 @@ class _CatalogViewState extends State<_CatalogView> {
             icon: const Icon(Icons.document_scanner_rounded, color: AppColors.primary),
             tooltip: 'Upload Doctor\'s Prescription (Rx)',
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const UploadPrescriptionScreen(),
-                ),
-              );
+              if (!MainNavigationShell.switchTab(context, 1)) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const UploadPrescriptionScreen(),
+                  ),
+                );
+              }
             },
           ),
           BlocBuilder<CartBloc, CartLoaded>(
@@ -99,12 +107,14 @@ class _CatalogViewState extends State<_CatalogView> {
                     ),
                     tooltip: 'Shopping Cart',
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const CartScreen(),
-                        ),
-                      );
+                      if (!MainNavigationShell.switchTab(context, 2)) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const CartScreen(),
+                          ),
+                        );
+                      }
                     },
                   ),
                   if (cartState.totalItemUnits > 0)

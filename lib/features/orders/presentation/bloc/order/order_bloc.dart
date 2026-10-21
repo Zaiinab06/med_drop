@@ -43,6 +43,7 @@ class OrderBloc extends Bloc<OrderEvent, OrderState> {
     FetchOrderHistoryEvent event,
     Emitter<OrderState> emit,
   ) async {
+    emit(const OrderLoading());
     final result = await getOrdersUseCase(const NoParams());
 
     result.fold(

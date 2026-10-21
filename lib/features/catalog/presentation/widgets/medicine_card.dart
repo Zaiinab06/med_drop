@@ -1,9 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:med_drop/core/constants/app_colors.dart';
 import 'package:med_drop/core/constants/app_constants.dart';
 import 'package:med_drop/features/catalog/domain/entities/medicine_entity.dart';
+import 'package:med_drop/features/orders/presentation/bloc/cart/cart_bloc.dart';
+import 'package:med_drop/features/orders/presentation/bloc/cart/cart_event.dart';
 
 /// Modern medical card component displaying a medicine's details, stock status,
 /// pricing in PKR, dosage information, and prescription requirements.
@@ -175,7 +178,48 @@ class MedicineCard extends StatelessWidget {
 
                     // Add to cart / Request button
                     InkWell(
-                      onTap: medicine.isInStock ? onAddToCart : null,
+                      onTap: medicine.isInStock
+                          ? () {
+                              if (onAddToCart != null) {
+                                onAddToCart!();
+                              } else {
+                                context
+                                    .read<CartBloc>()
+                                    .add(AddToCartEvent(medicine));
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.check_circle_rounded,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 10),
+                                        Expanded(
+                                          child: Text(
+                                            'Added ${medicine.brandName} to cart.',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    backgroundColor: AppColors.secondary,
+                                    behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        AppConstants.radiusSm,
+                                      ),
+                                    ),
+                                    duration: const Duration(seconds: 2),
+                                  ),
+                                );
+                              }
+                            }
+                          : null,
                       borderRadius: BorderRadius.circular(AppConstants.radiusSm),
                       child: Container(
                         padding: const EdgeInsets.symmetric(

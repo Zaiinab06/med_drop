@@ -19,10 +19,15 @@ class UploadPrescriptionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<PrescriptionBloc>(
-      create: (context) => sl<PrescriptionBloc>(),
-      child: const _UploadPrescriptionView(),
-    );
+    try {
+      context.read<PrescriptionBloc>();
+      return const _UploadPrescriptionView();
+    } catch (_) {
+      return BlocProvider<PrescriptionBloc>(
+        create: (context) => sl<PrescriptionBloc>(),
+        child: const _UploadPrescriptionView(),
+      );
+    }
   }
 }
 
@@ -621,7 +626,9 @@ class _UploadPrescriptionViewState extends State<_UploadPrescriptionView> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(ctx);
-                    Navigator.pop(context); // Return to previous screen
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context, prescription.id);
+                    }
                   },
                   child: const Text('Back to Home'),
                 ),

@@ -4,8 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'core/constants/app_colors.dart';
 import 'core/constants/app_constants.dart';
-import 'features/catalog/presentation/screens/catalog_screen.dart';
+import 'core/presentation/screens/main_navigation_shell.dart';
+import 'features/catalog/presentation/bloc/catalog_bloc.dart';
+import 'features/catalog/presentation/bloc/catalog_event.dart';
 import 'features/orders/presentation/bloc/cart/cart_bloc.dart';
+import 'features/prescription/presentation/bloc/prescription_bloc.dart';
 import 'injection_container.dart' as di;
 
 Future<void> main() async {
@@ -40,13 +43,23 @@ class MedDropApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<CartBloc>(
-      create: (context) => di.sl<CartBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<CartBloc>(
+          create: (context) => di.sl<CartBloc>(),
+        ),
+        BlocProvider<CatalogBloc>(
+          create: (context) => di.sl<CatalogBloc>()..add(const LoadCatalogEvent()),
+        ),
+        BlocProvider<PrescriptionBloc>(
+          create: (context) => di.sl<PrescriptionBloc>(),
+        ),
+      ],
       child: MaterialApp(
         title: AppConstants.appName,
         debugShowCheckedModeBanner: false,
         theme: _buildTheme(),
-        home: const CatalogScreen(),
+        home: const MainNavigationShell(),
       ),
     );
   }
